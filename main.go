@@ -3,64 +3,77 @@ package main
 import (
 	"fmt"
 	"math"
+	"os"
 	"sort"
-	// "guess-it-1/student/functions"
 )
 
+// Function to calculate the average of a slice of integers
 func Average(values []int) float64 {
 	var total float64
-
 	for _, v := range values {
 		total += float64(v)
 	}
-
 	return total / float64(len(values))
 }
 
+// Function to calculate the median of a slice of integers
 func Median(values []int) float64 {
-	var result float64
 	sort.Ints(values)
-	if len(values)%2 == 0 {
-		result = math.Round((float64(values[len(values)/2]) + float64(values[(len(values)/2)-1])) / 2)
-	} else {
-		result = float64(values[len(values)/2])
+	n := len(values)
+	if n%2 == 0 {
+		return (float64(values[n/2-1]) + float64(values[n/2])) / 2
 	}
-	return result
+	return float64(values[n/2])
 }
 
+// Function to calculate the variance of a slice of integers
 func Variance(values []int) float64 {
-	var result float64
-
+	avg := Average(values)
+	var total float64
 	for _, v := range values {
-		result += (float64(v) - Average(values)) * (float64(v) - Average(values))
+		total += (float64(v) - avg) * (float64(v) - avg)
 	}
-	result = result / float64(len(values))
-	return math.Round(result)
+	return total / float64(len(values))
 }
 
-func StandardDeviation(Variance float64) float64 {
-	return math.Sqrt(Variance) + 0.5
+// Function to calculate the standard deviation given the variance
+func StandardDeviation(variance float64) float64 {
+	return math.Sqrt(variance)
 }
 
-func CalculateRange(checkingValues []int) (int, int) {
-	if len(checkingValues) < 2 {
-		return (checkingValues[len(checkingValues)-1] - 50), (checkingValues[len(checkingValues)-1] + 50)
+// Function to calculate the lower and upper limits for outliers
+func CalculateRange(values []int) (int, int) {
+	if len(values) < 2 {
+		return values[len(values)-1] - 50, values[len(values)-1] + 50
 	}
-
-	lowerLimit := int(Average(checkingValues) - 1.5*StandardDeviation(Variance(checkingValues)))
-	upperLimit := int(Average(checkingValues) + 1.5*StandardDeviation(Variance(checkingValues)))
-
+	avg := Average(values)
+	stdDev := StandardDeviation(Variance(values))
+	lowerLimit := int(avg - 1.5*stdDev)
+	upperLimit := int(avg + 1.5*stdDev)
 	return lowerLimit, upperLimit
 }
 
 func main() {
+	var n int
 	var values []int
 
-	for i := 0; i <= 12500; i++ {
-		var n int
-		fmt.Scanf("%d", &n)
+	fmt.Println("Enter values, followed by 'Ctrl+D' to stop:")
+
+	// Loop to accept values from the user
+	for {
+		_, err := fmt.Fscan(os.Stdin, &n)
+		if err != nil {
+			if err.Error() == "EOF" { // End of input
+				break
+			}
+			os.Exit(1)
+		}
 		values = append(values, n)
-		v1, v2 := CalculateRange(values)
-		fmt.Printf("%d %d", v1, v2)
+
+		if len(values) > 1 {
+			// Calculate and print the range limits
+			v1, v2 := CalculateRange(values)
+			fmt.Printf("%d %d\n", v1, v2)
+		}
 	}
 }
