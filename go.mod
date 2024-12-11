@@ -1,3 +1,3 @@
-module guess-it-1
+module gyess-it-1
 
-go 1.23.3
+go 1.22.3
